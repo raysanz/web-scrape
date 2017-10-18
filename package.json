@@ -1,0 +1,16 @@
+{
+    "name": "web-scrape",
+    "version": "0.0.1",
+    "description": "scrapez n scrapz",
+    "main": "server.js",
+    "author": "rudez",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/raysanz/web-scrape.git"
+    },
+    "dependencies": {
+        "express": "latest",
+        "request": "latest",
+        "cheerio": "latest"
+    }
+}
