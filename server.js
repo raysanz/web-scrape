@@ -3,10 +3,26 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var app = express();
+/////http://localhost:8081/scrape
+const mongoose = require('mongoose')
+const bodyParser = require('body-parser');
+
+mongoose.Promise = global.Promise
+mongoose.connect(process.env.MONGOOSE_URL || 'mongodb://localhost:27017/rudy-crud')
+
+process.on('SIGINT', function () {
+    mongoose.connection.close(function () {
+        console.log('Mongoose default connection disconnected through app termination')
+        process.exit(0)
+    })
+})
+/////needed to get the data into the req.body
+app.use(bodyParser.json())
+
 
 app.get('/scrape', function (req, res) {
-    // Let's scrape Anchorman 2
-    url = 'http://www.imdb.com/title/tt0499549';
+
+    url = 'http://www.imdb.com/title/tt0468569';
 
     request(url, function (error, response, html) {
         if (!error) {
@@ -37,6 +53,7 @@ app.get('/scrape', function (req, res) {
         }
 
         fs.writeFile('output.json', JSON.stringify(json, null, 4), function (err) {
+            debugger
             console.log('File successfully written! - Check your project directory for the output.json file');
         })
 

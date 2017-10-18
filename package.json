@@ -11,6 +11,9 @@
     "dependencies": {
         "express": "latest",
         "request": "latest",
-        "cheerio": "latest"
+        "cheerio": "latest",
+        "body-parser": "^1.18.2",
+        "mongoose": "^4.12.1",
+        "save": "^2.3.1"
     }
 }
