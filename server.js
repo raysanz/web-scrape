@@ -6,9 +6,11 @@ var app = express();
 /////http://localhost:8081/scrape
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser');
+////importing the model
+const barHops = require('./storedData.model.js')
 
 mongoose.Promise = global.Promise
-mongoose.connect(process.env.MONGOOSE_URL || 'mongodb://localhost:27017/rudy-crud')
+mongoose.connect(process.env.MONGOOSE_URL || 'mongodb://localhost:27017/barHops')
 
 process.on('SIGINT', function () {
     mongoose.connection.close(function () {
@@ -22,39 +24,99 @@ app.use(bodyParser.json())
 
 app.get('/scrape', function (req, res) {
 
-    url = 'http://www.imdb.com/title/tt0468569';
+    url = 'https://www.yelp.com/biz/tiki-ti-cocktail-lounge-los-angeles?osq=tiki+bar';
 
     request(url, function (error, response, html) {
         if (!error) {
             var $ = cheerio.load(html);
 
-            var title, release, rating;
+            var restaurant, price, rating, address, recommend;
             var json = {
-                title: "",
-                release: "",
-                rating: ""
+                restaurant: "",
+                price: "",
+                rating: "",
+                address: "",
+                recommend: ""
             };
+            ////gets name
 
-            $('.title_wrapper').filter(function () {
+
+            $('.u-space-t1').filter(function () {
+                debugger
                 var data = $(this);
-                title = data.children().first().text().trim();
-                release = data.children().last().children().last().text().trim();
+                let newUrl = url
+                if (data.children("h1").first().text() !== "") {
+                    restaurant = data.children("h1").first().text().trim();
+                    json.restaurant = restaurant;
+                }
 
-                json.title = title;
-                json.release = release;
+
+                ////biz-page-header-left
+                ///release = data.children().last().children().last().text().trim();
             })
 
-            $('.ratingValue').filter(function () {
+            $('.biz-page-header-left').filter(function () {
+                debugger
                 var data = $(this);
-                rating = data.text().trim();
+                let newUrl = url
+                if (data.children().first().text() !== "") {
+                    restaurant = data.children().children("h1").text()
+                    ///.first().text().trim();
+                    json.restaurant = restaurant;
+                }
+
+
+                ////biz-page-header-left
+                ///release = data.children().last().children().last().text().trim();
+            })
+
+
+            ////gets price
+            $('.bullet-after').filter(function () {
+                debugger
+                var data = $(this);
+                price = data.children().first().text().trim();
+                ///release = data.children().last().children().last().text().trim();
+
+                json.price = price;
+
+            })
+            ////gets rating
+            $('.biz-rating-very-large').filter(function () {
+                debugger
+                var data = $(this);
+                rating = data.children().attr('title')
+                ///.attr("alt")
 
                 json.rating = rating;
+            })
+            ////gets address
+            $('.street-address').filter(function () {
+                debugger
+                var data = $(this);
+                address = data.children().first().text().trim();
+                ///release = data.children().last().children().last().text().trim();
+
+                json.address = address;
+
+            })
+            ///gets people also viewed
+            $('.ylist').filter(function () {
+                debugger
+                var data = $(this);
+                recommend = data.children().first().text().trim();
+                ///release = data.children().last().children().last().text().trim();
+
+                json.address = address;
+
             })
         }
 
         fs.writeFile('output.json', JSON.stringify(json, null, 4), function (err) {
             debugger
             console.log('File successfully written! - Check your project directory for the output.json file');
+            let newEntry = new barHops(json)
+            newEntry.save()
         })
 
         res.send('Check your console!')
